@@ -7,16 +7,15 @@ let package = Package(
        .macOS(.v13)
     ],
     dependencies: [
-        // 💧 A server-side Swift web framework.
         .package(url: "https://github.com/vapor/vapor.git", from: "4.99.3"),
-        // 🗄 An ORM for SQL and NoSQL databases.
         .package(url: "https://github.com/vapor/fluent.git", from: "4.9.0"),
-        // 🌱 Fluent driver for Mongo.
         .package(url: "https://github.com/vapor/fluent-mongo-driver.git", from: "1.3.1"),
-        // 🍃 An expressive, performant, and extensible templating language built for Swift.
         .package(url: "https://github.com/vapor/leaf.git", from: "4.3.0"),
-        // 🔵 Non-blocking, event-driven networking for Swift. Used for custom executors
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
+        .package(url: "https://github.com/vapor/jwt.git", from: "5.0.0-rc.1"),
+        .package(url: "https://github.com/vapor/jwt-kit.git", from: "5.0.0-rc.1"),
+        .package(url: "https://github.com/apple/swift-crypto.git", from: "3.5.2"),
+        .package(url: "https://github.com/vamsii777/FirebaseAdmin.git", branch: "update/jwt-kit-to-5.0.0-rc.1"),
     ],
     targets: [
         .executableTarget(
@@ -28,6 +27,14 @@ let package = Package(
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
+                .product(name: "JWT", package: "jwt"),
+                .product(name: "JWTKit", package: "jwt-kit"),
+                .product(name: "Crypto", package: "swift-crypto"),
+                .product(name: "FirebaseApp", package: "FirebaseAdmin"),
+                .product(name: "FirebaseAuth", package: "FirebaseAdmin"),
+            ],
+            resources: [
+                .copy("serviceAccount.json")
             ],
             swiftSettings: swiftSettings
         ),
