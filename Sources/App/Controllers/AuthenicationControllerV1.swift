@@ -107,6 +107,10 @@ struct AuthenicationControllerV1: RouteCollection {
         guard let provider = req.parameters.get("provider") else {
             throw Abort(.badRequest, reason: "Provider is required")
         }
+
+        if provider != "firebase" {
+            throw Abort(.badRequest, reason: "Invalid provider")
+        }
         
         guard let idToken = try? req.content.get(String.self, at: "id_token") else {
             throw Abort(.badRequest, reason: "ID token is required")
@@ -125,7 +129,7 @@ struct AuthenicationControllerV1: RouteCollection {
         let firebaseUserFirstName = firebaseUser.name?.components(separatedBy: " ").first
         let firebaseUserLastName = firebaseUser.name?.components(separatedBy: " ").last
         
-        if user == nil {
+        if user == nil && provider == "firebase" {
             // Create a new user
             user = User(
                 firstName: firebaseUserFirstName, 
@@ -142,6 +146,8 @@ struct AuthenicationControllerV1: RouteCollection {
             )
             try await user?.save(on: req.db)
         }
+
+        
         
         guard let existingUser = user else {
             throw Abort(.unauthorized)
