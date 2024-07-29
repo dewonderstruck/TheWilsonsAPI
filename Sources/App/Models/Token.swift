@@ -26,10 +26,13 @@ final class Token: Model, Content, @unchecked Sendable {
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
     
-    @Timestamp(key: "expires_at", on: .create)
+    @Timestamp(key: "expires_at", on: .none)
     var expiresAt: Date?
     
-    @Timestamp(key: "refresh_token_expires_at", on: .create)
+    @Field(key: "expires_at_timestamp")
+    var expiresAtTimestamp: TimeInterval?
+    
+    @Timestamp(key: "refresh_token_expires_at", on: .none)
     var refreshTokenExpiresAt: Date?
     
     @Enum(key: "status")
@@ -43,6 +46,7 @@ final class Token: Model, Content, @unchecked Sendable {
          createdAt: Date = Date(),
          expiresAt: Date,
          refreshTokenExpiresAt: Date,
+         expiresAtTimestamp: TimeInterval? = nil,
          status: TokenStatus = .active) {
         self.id = id
         self.tokenValue = tokenValue
@@ -50,6 +54,7 @@ final class Token: Model, Content, @unchecked Sendable {
         self.$user.id = userID
         self.createdAt = createdAt
         self.expiresAt = expiresAt
+        self.expiresAtTimestamp = expiresAtTimestamp
         self.refreshTokenExpiresAt = refreshTokenExpiresAt
         self.status = status
     }
@@ -61,14 +66,31 @@ final class Token: Model, Content, @unchecked Sendable {
         let accessTokenExpirationDate = Date().addingTimeInterval(accessTokenExpirationTime)
         let refreshTokenExpirationDate = Date().addingTimeInterval(refreshTokenExpirationTime)
         
+        // Fetch user's role permissions
+        let rolePermissions = try await user.$rolePermissions.get(on: req.db)
+        
+        // Generate scopes based on role permissions
+        let scopes = try await generateScopes(for: user, rolePermissions: rolePermissions)
+        
         let accessTokenPayload = UserPayload(
+            scope: scopes,
             subject: SubjectClaim(value: user.id?.uuidString ?? ""),
             expiration: ExpirationClaim(value: accessTokenExpirationDate),
             issuedAt: IssuedAtClaim(value: Date()),
-            issuer: IssuerClaim(value: "v1.vapr-auth.api.tktchurch.com")
+            issuer: IssuerClaim(value: "https://securetoken.dewonderstruck.com/thewilsons"),
+            aud: AudienceClaim(value: "thewilsons")
         )
         
-        let accessTokenString = try await req.jwt.sign(accessTokenPayload, kid: "private")
+        // Load private keys from the database
+        let privateKeys = try await Key.query(on: req.db).filter(\.$keyType == .privateKey).filter(\.$status == .active).all()
+        
+        guard let selectedPrivateKey = privateKeys.randomElement() else {
+            throw Abort(.internalServerError, reason: "No private key found in the database.")
+        }
+        
+        let privateKeyKid = JWKIdentifier(string: selectedPrivateKey.kid)
+        
+        let accessTokenString = try await req.jwt.sign(accessTokenPayload, kid: privateKeyKid)
         
         // Generate a secure random string for the refresh token
         let refreshTokenString = try generateSecureRandomString()
@@ -85,6 +107,22 @@ final class Token: Model, Content, @unchecked Sendable {
         )
         
         return (token, refreshTokenString)
+    }
+    
+    // Helper function to generate scopes
+    private static func generateScopes(for user: User, rolePermissions: [RolePermission]) async throws -> String {
+        var scopes: Set<String> = []
+        
+        // Add role permissions to scopes
+        for rolePermission in rolePermissions {
+            scopes.insert("role:\(rolePermission.name)")
+            for permission in rolePermission.permissions {
+                scopes.insert("\(permission.rawValue)")
+            }
+        }
+        
+        // Convert Set to space-separated String
+        return scopes.joined(separator: " ")
     }
     
     private static func generateSecureRandomString() throws -> String {

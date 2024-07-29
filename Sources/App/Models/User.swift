@@ -80,6 +80,9 @@ final class User: Model, Content, @unchecked Sendable {
     @Field(key: "area")
     var area: String?
     
+    @Siblings(through: UserRolePermission.self, from: \.$user, to: \.$rolePermission)
+    var rolePermissions: [RolePermission]
+    
     init() { }
     
     init(

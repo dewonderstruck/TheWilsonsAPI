@@ -1,5 +1,5 @@
 {
-  "originHash" : "377f40d4da2f0324d0dccafaa1c20744090d2d488a8dcd56fb50aed88871353f",
+  "originHash" : "3d624efe431709898cbb27a09bf00d154f5441b1f50ec4fe47ced79046dce428",
   "pins" : [
     {
       "identity" : "anycodable",
@@ -115,7 +115,7 @@
       "location" : "https://github.com/grpc/grpc-swift.git",
       "state" : {
         "branch" : "main",
-        "revision" : "899c1218276bf4e2273bc91bf93b7a744911a0f5"
+        "revision" : "3f749833b24e5eb0ffa11aaef7e0e0e5c3aca488"
       }
     },
     {
@@ -170,6 +170,42 @@
       "state" : {
         "revision" : "a31236f24bfd2ea2f520a74575881f6731d7ae68",
         "version" : "4.7.0"
+      }
+    },
+    {
+      "identity" : "queues",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vapor/queues.git",
+      "state" : {
+        "revision" : "15829c524480424ce29b24fc36c452b07e352124",
+        "version" : "1.15.0"
+      }
+    },
+    {
+      "identity" : "queues-redis-driver",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vapor/queues-redis-driver.git",
+      "state" : {
+        "revision" : "89a4350c1a6eb03b5693f481817741ff36a8cdcc",
+        "version" : "1.1.1"
+      }
+    },
+    {
+      "identity" : "redis",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vapor/redis.git",
+      "state" : {
+        "revision" : "383ed57e5b5acd4dd447c2967aa665dc3bbe5be9",
+        "version" : "4.11.0"
+      }
+    },
+    {
+      "identity" : "redistack",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swift-server/RediStack.git",
+      "state" : {
+        "revision" : "622ce440f90d79b58e45f3a3efdd64c51d1dfd17",
+        "version" : "1.6.2"
       }
     },
     {
@@ -276,8 +312,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "fc79798d5a150d61361a27ce0c51169b889e23de",
-        "version" : "2.68.0"
+        "revision" : "e4abde8be0e49dc7d66e6eed651254accdcd9533",
+        "version" : "2.69.0"
       }
     },
     {
@@ -294,8 +330,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-http2.git",
       "state" : {
-        "revision" : "a0224f3d20438635dd59c9fcc593520d80d131d0",
-        "version" : "1.33.0"
+        "revision" : "b5f7062b60e4add1e8c343ba4eb8da2e324b3a94",
+        "version" : "1.34.0"
       }
     },
     {
@@ -332,6 +368,15 @@
       "state" : {
         "revision" : "e17d61f26df0f0e06f58f6977ba05a097a720106",
         "version" : "1.27.1"
+      }
+    },
+    {
+      "identity" : "swift-resend",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/hsharghi/swift-resend.git",
+      "state" : {
+        "revision" : "3cc66843378709cf903379dc73e84168f7bfcc26",
+        "version" : "1.0.2"
       }
     },
     {

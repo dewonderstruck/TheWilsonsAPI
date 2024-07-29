@@ -1,9 +1,19 @@
 import Vapor
 import Fluent
+import Resend
 import FirebaseAuth
 
 struct LoginData: Content, Authenticatable {
     let email: String
+    let password: String
+}
+
+struct PasswordResetRequestDTO: Content {
+    let email: String
+}
+
+struct PasswordResetDTO: Content {
+    let token: String
     let password: String
 }
 
@@ -18,6 +28,9 @@ struct AuthenicationControllerV1: RouteCollection {
         let authGroup = auth.grouped(TokenAuthenticator()).grouped(User.guardMiddleware())
         auth.post("login", use: loginHandler)
         auth.post("refresh", use: refreshHandler)
+        auth.post("password", "request", use: requestPasswordResetHandler)
+        auth.post("password", "reset", use: resetPasswordHandler)
+        auth.get("password", "reset", use: renderResetPasswordView)
         auth.post("login", ":provider", use: loginWithProviderHandler)
         authGroup.post("logout", use: enhancedLogoutHandler)
     }
@@ -49,7 +62,8 @@ struct AuthenicationControllerV1: RouteCollection {
         return TokenDTO(
             accessToken: token.tokenValue,
             refreshToken: refreshTokenString,
-            expires: token.expiresAt
+            expiresAt: token.expiresAt,
+            expiresAtTimestamp: TimeInterval(token.expiresAt?.timeIntervalSince1970 ?? 0.0)
         )
     }
     
@@ -93,7 +107,8 @@ struct AuthenicationControllerV1: RouteCollection {
         return TokenDTO(
             accessToken: newToken.tokenValue,
             refreshToken: newRefreshTokenString,
-            expires: newToken.expiresAt
+            expiresAt: newToken.expiresAt,
+            expiresAtTimestamp: TimeInterval(token.expiresAt?.timeIntervalSince1970 ?? 0.0)
         )
     }
     
@@ -161,7 +176,8 @@ struct AuthenicationControllerV1: RouteCollection {
         return TokenDTO(
             accessToken: token.tokenValue,
             refreshToken: refreshTokenString,
-            expires: token.expiresAt
+            expiresAt: token.expiresAt,
+            expiresAtTimestamp: TimeInterval(token.expiresAt?.timeIntervalSince1970 ?? 0.0)
         )
     }
     
@@ -204,4 +220,77 @@ struct AuthenicationControllerV1: RouteCollection {
         
         return .ok
     }
+
+    // MARK: - Request Password Reset
+    @Sendable
+    func requestPasswordResetHandler(_ req: Request) async throws -> HTTPStatus {
+        let data = try req.content.decode(PasswordResetRequestDTO.self)
+        
+        guard let user = try await User.query(on: req.db)
+            .filter(\.$email == data.email)
+            .first()
+        else {
+            throw Abort(.notFound, reason: "User not found")
+        }
+        
+        let token = try PasswordResetToken.generate(for: user)
+        
+        try await token.save(on: req.db)
+        
+        let resetUrl = req.application.config.publicURL + "/v1/auth/password/reset?token=\(token.value)"
+        
+        let htmlContent = req.view.render("password-reset-email", ["resetLink": resetUrl])
+        let response = try await htmlContent.encodeResponse(for: req).get()
+        let htmlString = response.body.string ?? ""
+        
+        let email = ResendEmail(
+            from: EmailAddress(email: "no-reply@thewilsonsbespoke.com", name: "The Wilson's Bespoke"),
+            to: [EmailAddress(email: user.email)],
+            subject: "Password Reset Request",
+            html: htmlString
+        )
+        
+        do {
+            _ = try await req.application.resend.emails.send(email: email)
+            return .ok
+        } catch {
+            req.logger.error("Failed to send password reset email: \(error)")
+            throw Abort(.internalServerError, reason: "Failed to send password reset email")
+        }
+    }
+
+    // MARK: - Render Reset Password View
+    @Sendable
+    func renderResetPasswordView(_ req: Request) async throws -> View {
+        guard let token = req.query[String.self, at: "token"] else {
+            throw Abort(.badRequest, reason: "Missing reset token")
+        }
+        return try await req.view.render("reset-password", ["token": token])
+    }
+
+    // MARK: - Reset Password
+    @Sendable
+    func resetPasswordHandler(_ req: Request) async throws -> HTTPStatus {
+        let data = try req.content.decode(PasswordResetDTO.self)
+        
+        guard let token = try await PasswordResetToken.query(on: req.db)
+            .filter(\.$value == data.token)
+            .with(\.$user)
+            .first()
+        else {
+            throw Abort(.notFound, reason: "Invalid or expired reset token")
+        }
+        
+        guard token.expiresAt > Date() else {
+            try await token.delete(on: req.db)
+            throw Abort(.gone, reason: "Reset token has expired")
+        }
+        
+        token.user.password = try Bcrypt.hash(data.password)
+        try await token.user.save(on: req.db)
+        try await token.delete(on: req.db)
+        
+        return .ok
+    }
+    
 }

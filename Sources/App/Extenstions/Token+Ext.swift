@@ -11,8 +11,9 @@ struct UserPayload: JWTPayload {
         case issuedAt = "iat"
         case issuer = "iss"
         case aud = "aud"
+        case scope = "scope"
     }
-    
+    let scope: String
     var subject: SubjectClaim
     var expiration: ExpirationClaim
     var issuedAt: IssuedAtClaim
@@ -53,5 +54,14 @@ extension Token: ModelTokenAuthenticatable {
             throw Abort(.unauthorized)
         }
         return try await token.$user.get(on: request.db)
+    }
+}
+
+extension Token {
+    func timeUntilExpirationInMilliseconds() -> Int? {
+        guard let expiresAt = self.expiresAt else { return nil }
+        let currentTime = Date()
+        let timeInterval = expiresAt.timeIntervalSince(currentTime)
+        return timeInterval > 0 ? Int(timeInterval * 1000) : 0
     }
 }
