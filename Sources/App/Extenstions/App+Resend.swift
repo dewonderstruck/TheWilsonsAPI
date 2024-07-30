@@ -1,5 +1,5 @@
 import Vapor
-import Resend
+@preconcurrency import Resend
 
 extension Application {
     public struct Resend {

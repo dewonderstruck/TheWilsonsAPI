@@ -10,6 +10,7 @@ import struct Foundation.UUID
 /// afterwards with `@unchecked Sendable`.
 final class Token: Model, Content, @unchecked Sendable {
     static let schema = "tokens"
+    static let database: DatabaseID = .tokens
     
     @ID(key: .id)
     var id: UUID?

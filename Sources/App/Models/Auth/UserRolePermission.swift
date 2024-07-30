@@ -3,7 +3,7 @@ import Vapor
 
 final class UserRolePermission: Model, @unchecked Sendable {
     static let schema = "user_role_permissions"
-
+    static let database: DatabaseID = .main
     @ID(key: .id)
     var id: UUID?
 

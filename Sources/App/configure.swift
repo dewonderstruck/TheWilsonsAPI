@@ -13,7 +13,6 @@ public func configure(_ app: Application) async throws {
     // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
 
      try configureDatabases(app)
-     app.databases.default(to: .main)
 
      let corsOrigins = Environment.get("CORS_ORIGINS")?.split(separator: ",").map(String.init) ?? []
     

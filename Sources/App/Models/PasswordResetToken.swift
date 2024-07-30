@@ -9,6 +9,7 @@ import struct Foundation.UUID
 final class PasswordResetToken: Model, Content, @unchecked Sendable {
     
     static let schema = "password_reset_tokens"
+    static let database: DatabaseID = .tokens
     
     @ID(key: .id)
     var id: UUID?

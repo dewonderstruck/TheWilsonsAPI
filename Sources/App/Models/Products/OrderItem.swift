@@ -3,7 +3,7 @@ import Vapor
 
 final class OrderItem: Model, Content, @unchecked Sendable {
     static let schema = "order_items"
-    
+    static let database: DatabaseID = .orders
     @ID(key: .id)
     var id: UUID?
     

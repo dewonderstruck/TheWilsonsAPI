@@ -6,13 +6,15 @@ struct OrderControllerV1: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let v1 = routes.grouped("v1")
         let orders = v1.grouped("orders")
+        // Protected routes
+        let protectedOrders = orders.grouped(TokenAuthenticator()).grouped(User.guardMiddleware())
         orders.get(use: index)
-        orders.post(use: create)
-        orders.group(":orderID") { order in
-            order.get(use: show)
-            order.put(use: update)
-            order.delete(use: delete)
-        }
+        protectedOrders.grouped(requireAll: .createOrders).post(use: create)
+        // Require multiple permissions (AND logic)
+        protectedOrders.grouped(requireAll: .updateOrders, .manageOrders).put(":orderId", use: update)
+        // Require any of the specified permissions (OR logic)
+        protectedOrders.grouped(requireAny: .deleteOrders, .manageOrders).delete(":orderId", use: delete)
+        protectedOrders.grouped(requireAll: .readOrders).get(":orderID", use: show)
     }
     
     @Sendable

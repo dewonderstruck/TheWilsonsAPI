@@ -69,7 +69,6 @@ struct ProductControllerV1: RouteCollection {
         product.price = input.price
         try await product.save(on: req.db(.products))
         
-        let categories = try await product.$categories.get(on: req.db(.products))
         for categoryID in input.categoryIDs {
             guard let category = try await Category.find(categoryID, on: req.db(.products)) else {
                 throw Abort(.badRequest, reason: "Category not found")

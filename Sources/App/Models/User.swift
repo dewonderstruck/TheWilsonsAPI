@@ -28,7 +28,9 @@ enum Roles: String, Codable {
 }
 
 final class User: Model, Content, @unchecked Sendable {
+    
     static let schema: String = "users"
+    static let database: DatabaseID = .main
     
     @ID(key: .id)
     var id: UUID?
