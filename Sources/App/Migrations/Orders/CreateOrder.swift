@@ -7,6 +7,8 @@ struct CreateOrder: AsyncMigration {
             .field("user_id", .uuid, .required, .references("users", "id"))
             .field("total", .double, .required)
             .field("status", .string, .required)
+            .field("created_at", .datetime)
+            .field("updated_at", .datetime)
             .create()
     }
 

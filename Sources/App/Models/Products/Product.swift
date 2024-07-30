@@ -25,6 +25,12 @@ final class Product: Model, Content, @unchecked Sendable {
     
     @Siblings(through: ProductCategory.self, from: \.$product, to: \.$category)
     var categories: [Category]
+
+    @Parent(key: "user_created")
+    var userCreated: User
+
+    @Parent(key: "user_updated")
+    var userUpdated: User
     
     init() { }
     
@@ -33,7 +39,8 @@ final class Product: Model, Content, @unchecked Sendable {
     description: String, 
     price: Double,
     createdAt: Date? = nil,
-    updatedAt: Date? = nil
+    updatedAt: Date? = nil,
+    userCreated: User.IDValue, userUpdated: User.IDValue
     ) {
         self.id = id
         self.name = name
@@ -41,6 +48,8 @@ final class Product: Model, Content, @unchecked Sendable {
         self.price = price
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+        self.$userCreated.id = userCreated
+        self.$userUpdated.id = userUpdated
     }
 
      func toDTO() -> ProductDTO {
@@ -51,7 +60,9 @@ final class Product: Model, Content, @unchecked Sendable {
             price: self.price, 
             categoryIDs: self.categories.map { $0.id! },
             createdAt: self.createdAt,
-            updatedAt: self.updatedAt
+            updatedAt: self.updatedAt,
+            userCreated: self.$userCreated.id,
+            userUpdated: self.$userUpdated.id
             )
      }
 }

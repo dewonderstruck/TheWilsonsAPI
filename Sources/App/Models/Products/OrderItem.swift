@@ -18,22 +18,42 @@ final class OrderItem: Model, Content, @unchecked Sendable {
     
     @Field(key: "price")
     var price: Double
+
+    @Timestamp(key: "created_at", on: .create)
+    var createdAt: Date?
+
+    @Timestamp(key: "updated_at", on: .update)
+    var updatedAt: Date?
+
+    @Parent(key: "user_created")
+    var userCreated: User
+
+    @Parent(key: "user_updated")
+    var userUpdated: User
     
     init() { }
     
-    init(id: UUID? = nil, orderID: UUID, productID: UUID, quantity: Int, price: Double) {
+    init(id: UUID? = nil, orderID: UUID, productID: UUID, quantity: Int, price: Double, createdAt: Date? = nil, updatedAt: Date? = nil, userCreated: User.IDValue, userUpdated: User.IDValue) {
         self.id = id
         self.$order.id = orderID
         self.$product.id = productID
         self.quantity = quantity
         self.price = price
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.$userCreated.id = userCreated
+        self.$userUpdated.id = userUpdated
     }
     
     func toDTO() -> OrderItemDTO {
         return OrderItemDTO(
             productID: self.$product.id,
             quantity: self.quantity,
-            price: self.price
+            price: self.price,
+            createdAt: self.createdAt,
+            updatedAt: self.updatedAt,
+            userCreated: self.$userCreated.id,
+            userUpdated: self.$userUpdated.id
         )
     }
 }

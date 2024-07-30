@@ -8,6 +8,8 @@ struct CreateOrderItem: AsyncMigration {
             .field("product_id", .uuid, .required, .references("products", "id"))
             .field("quantity", .int, .required)
             .field("price", .double, .required)
+            .field("created_at", .datetime)
+            .field("updated_at", .datetime)
             .create()
     }
 

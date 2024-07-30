@@ -23,7 +23,7 @@ struct OrderControllerV1: RouteCollection {
         do {
             return try orders.map { try $0.toDTO() }
         } catch {
-            throw Abort(.internalServerError, reason: "Failed to convert orders to DTO.")
+            throw Abort(.internalServerError, reason: "Failed to convert orders to DTOs.")
         }
     }
     
