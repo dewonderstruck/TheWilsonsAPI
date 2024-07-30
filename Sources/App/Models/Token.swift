@@ -71,8 +71,12 @@ final class Token: Model, Content, @unchecked Sendable {
         
         // Generate scopes based on role permissions
         let scopes = try await generateScopes(for: user, rolePermissions: rolePermissions)
+
+        // Generate roles based on role permissions
+        let roles = try await generateRoles(for: user, rolePermissions: rolePermissions)
         
         let accessTokenPayload = UserPayload(
+            role: roles,
             scope: scopes,
             subject: SubjectClaim(value: user.id?.uuidString ?? ""),
             expiration: ExpirationClaim(value: accessTokenExpirationDate),
@@ -115,7 +119,6 @@ final class Token: Model, Content, @unchecked Sendable {
         
         // Add role permissions to scopes
         for rolePermission in rolePermissions {
-            scopes.insert("role:\(rolePermission.name)")
             for permission in rolePermission.permissions {
                 scopes.insert("\(permission.rawValue)")
             }
@@ -123,6 +126,19 @@ final class Token: Model, Content, @unchecked Sendable {
         
         // Convert Set to space-separated String
         return scopes.joined(separator: " ")
+    }
+
+    // Helper function to generate roles
+    private static func generateRoles(for user: User, rolePermissions: [RolePermission]) async throws -> String {
+        var roles: Set<String> = []
+        
+        // Add role permissions to roles
+        for rolePermission in rolePermissions {
+            roles.insert(rolePermission.name)
+        }
+        
+        // Convert Set to space-separated String
+        return roles.joined(separator: " ")
     }
     
     private static func generateSecureRandomString() throws -> String {

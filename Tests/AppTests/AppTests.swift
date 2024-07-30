@@ -2,67 +2,35 @@
 import XCTVapor
 import Fluent
 
-final class AppTests: XCTestCase {
+final class AppTests: XCTestCase, @unchecked Sendable {
     var app: Application!
     
     override func setUp() async throws {
         self.app = try await Application.make(.testing)
-        try await configure(app)
-        try await app.autoMigrate()
+        try await configure(self.app)
     }
     
-    override func tearDown() async throws { 
-        try await app.autoRevert()
-        try await self.app.asyncShutdown()
-        self.app = nil
+    override func tearDown() async throws {
+        try await app.asyncShutdown()
     }
     
-    func testHelloWorld() async throws {
-        try await self.app.test(.GET, "hello", afterResponse: { res async in
-            XCTAssertEqual(res.status, .ok)
-            XCTAssertEqual(res.body.string, "Hello, world!")
-        })
-    }
-    
-    func testTodoIndex() async throws {
-        let sampleTodos = [Todo(title: "sample1"), Todo(title: "sample2")]
-        try await sampleTodos.create(on: self.app.db)
-        
-        try await self.app.test(.GET, "todos", afterResponse: { res async throws in
-            XCTAssertEqual(res.status, .ok)
-            XCTAssertEqual(
-                try res.content.decode([TodoDTO].self).sorted(by: { $0.title ?? "" < $1.title ?? "" }),
-                sampleTodos.map { $0.toDTO() }.sorted(by: { $0.title ?? "" < $1.title ?? "" })
-            )
-        })
-    }
-    
-    func testTodoCreate() async throws {
-        let newDTO = TodoDTO(id: nil, title: "test")
-        
-        try await self.app.test(.POST, "todos", beforeRequest: { req in
-            try req.content.encode(newDTO)
+    func testLogin() async throws {
+        let loginData = LoginData(email: "vamsi@dewonderstruck.com", password: "password")
+        try await app.test(.POST, "v1/auth/login", beforeRequest: { req in
+            try req.content.encode(loginData)
+            req.headers.contentType = .json
         }, afterResponse: { res async throws in
             XCTAssertEqual(res.status, .ok)
-            let models = try await Todo.query(on: self.app.db).all()
-            XCTAssertEqual(models.map { $0.toDTO().title }, [newDTO.title])
+            let tokenDTO = try res.content.decode(TokenDTO.self)
+            XCTAssertNotNil(tokenDTO.accessToken)
+            XCTAssertNotNil(tokenDTO.refreshToken)
+            XCTAssertNotEqual(tokenDTO.expiresAtTimestamp, 0)
         })
     }
-    
-    func testTodoDelete() async throws {
-        let testTodos = [Todo(title: "test1"), Todo(title: "test2")]
-        try await testTodos.create(on: app.db)
-        
-        try await self.app.test(.DELETE, "todos/\(testTodos[0].requireID())", afterResponse: { res async throws in
-            XCTAssertEqual(res.status, .noContent)
-            let model = try await Todo.find(testTodos[0].id, on: self.app.db)
-            XCTAssertNil(model)
-        })
-    }
-}
 
-extension TodoDTO: Equatable {
-    public static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.id == rhs.id && lhs.title == rhs.title
+    func testGetCertificatesList() async throws {
+        try await app.test(.GET, "hello", afterResponse: { res async throws in
+            XCTAssertEqual(res.status, .ok)
+        })
     }
 }

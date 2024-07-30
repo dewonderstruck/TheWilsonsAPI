@@ -12,7 +12,9 @@ struct UserPayload: JWTPayload {
         case issuer = "iss"
         case aud = "aud"
         case scope = "scope"
+        case role = "role"
     }
+    let role: String
     let scope: String
     var subject: SubjectClaim
     var expiration: ExpirationClaim

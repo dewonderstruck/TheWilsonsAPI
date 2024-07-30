@@ -1,25 +1,42 @@
-import NIOSSL
-import Fluent
-import FluentMongoDriver
-import Leaf
-import JWT
 import Vapor
-import FirebaseApp
 import Resend
 
 extension Application {
-    struct ResendKey: StorageKey {
-        typealias Value = ResendClient
-    }
-    var resend: ResendClient {
-        get {
-            guard let client = storage[ResendKey.self] else {
-                fatalError("Resend not configured. Use app.resend = ...")
+    public struct Resend {
+        
+        private final class Storage: Sendable {
+            let apiKey: String
+            
+            init(apiKey: String) {
+                self.apiKey = apiKey
             }
-            return client
         }
-        set {
-            storage[ResendKey.self] = newValue
+        
+        private struct Key: StorageKey {
+            typealias Value = Storage
+        }
+        
+        private var storage: Storage {
+            if self.application.storage[Key.self] == nil {
+                self.initialize()
+            }
+            return self.application.storage[Key.self]!
+        }
+        
+        public func initialize() {
+            guard let apiKey = Environment.get("RESEND_API_KEY") else {
+                fatalError("No Resend API key provided")
+            }
+            
+            self.application.storage[Key.self] = .init(apiKey: apiKey)
+        }
+        
+        fileprivate let application: Application
+        
+        public var client: ResendClient {
+            .init(httpClient: self.application.http.client.shared, apiKey: self.storage.apiKey)
         }
     }
+    
+    public var resend: Resend { .init(application: self) }
 }

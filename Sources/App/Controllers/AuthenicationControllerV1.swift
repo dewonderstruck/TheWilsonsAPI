@@ -251,7 +251,7 @@ struct AuthenicationControllerV1: RouteCollection {
         )
         
         do {
-            _ = try await req.application.resend.emails.send(email: email)
+            _ = try await req.application.resend.client.emails.send(email: email)
             return .ok
         } catch {
             req.logger.error("Failed to send password reset email: \(error)")

@@ -10,13 +10,13 @@ func configureDatabases(_ app: Application) throws {
     }
     try app.databases.use(.mongo(connectionString: mainDBURL), as: .main)
 
-    // Configure key management database
-    guard let keyDBURL = Environment.get("CRYPTO_DATABASE_URL") else {
-        app.logger.warning("Key management database URL not found in environment variables.")
-        // Continue without setting up key management database if it's optional
-        return
-    }
-    try app.databases.use(.mongo(connectionString: keyDBURL), as: .keyManagement)
+//    // Configure key management database
+//    guard let keyDBURL = Environment.get("CRYPTO_DATABASE_URL") else {
+//        app.logger.warning("Key management database URL not found in environment variables.")
+//        // Continue without setting up key management database if it's optional
+//        return
+//    }
+//    try app.databases.use(.mongo(connectionString: keyDBURL), as: .keyManagement)
 }
 
 extension DatabaseID {

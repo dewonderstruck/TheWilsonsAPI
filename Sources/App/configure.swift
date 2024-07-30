@@ -44,10 +44,6 @@ public func configure(_ app: Application) async throws {
     app.sessions.use(.fluent)
     app.middleware.use(app.sessions.middleware)
     
-    let httpClient = HTTPClient(eventLoopGroupProvider: .singleton)
-    let resendClient = ResendClient(httpClient: httpClient, apiKey: Environment.get("RESEND_API_KEY") ?? "re_9JMjbbFQ_3g8t2wau18zwsHYTLBvgmx9y")
-    app.resend = resendClient
-    
     app.config.publicURL = Environment.get("PUBLIC_URL") ?? "http://localhost:8080"
     
     app.views.use(.leaf)
