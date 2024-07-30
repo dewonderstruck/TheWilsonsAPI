@@ -8,7 +8,7 @@ struct OrderControllerV1: RouteCollection {
         let orders = v1.grouped("orders")
         // Protected routes
         let protectedOrders = orders.grouped(TokenAuthenticator()).grouped(User.guardMiddleware())
-        orders.get(use: index)
+        protectedOrders.grouped(requireAll: .readOrders).get(use: index)
         protectedOrders.grouped(requireAll: .createOrders).post(use: create)
         // Require multiple permissions (AND logic)
         protectedOrders.grouped(requireAll: .updateOrders, .manageOrders).put(":orderId", use: update)
@@ -19,7 +19,7 @@ struct OrderControllerV1: RouteCollection {
     
     @Sendable
     func index(req: Request) async throws -> [OrderDTO] {
-        let orders = try await Order.query(on: req.db(.orders)).with(\.$items).all()
+        let orders = try await Order.query(on: req.db).with(\.$items).all()
         do {
             return try orders.map { try $0.toDTO() }
         } catch {
@@ -31,11 +31,11 @@ struct OrderControllerV1: RouteCollection {
     func create(req: Request) async throws -> OrderDTO {
         let input = try req.content.decode(OrderDTO.self)
         let order = Order(userID: input.userID, total: input.total, status: input.status)
-        try await order.save(on: req.db(.orders))
+        try await order.save(on: req.db)
         
         for itemDTO in input.items {
             let orderItem = OrderItem(orderID: try order.requireID(), productID: itemDTO.productID, quantity: itemDTO.quantity, price: itemDTO.price)
-            try await orderItem.save(on: req.db(.orders))
+            try await orderItem.save(on: req.db)
         }
         
         return try order.toDTO()
@@ -43,33 +43,33 @@ struct OrderControllerV1: RouteCollection {
     
     @Sendable
     func show(req: Request) async throws -> OrderDTO {
-        guard let order = try await Order.find(req.parameters.get("orderID"), on: req.db(.orders)) else {
+        guard let order = try await Order.find(req.parameters.get("orderID"), on: req.db) else {
             throw Abort(.notFound)
         }
-        try await order.$items.load(on: req.db(.orders))
+        try await order.$items.load(on: req.db)
         return try order.toDTO()
     }
     
     @Sendable
     func update(req: Request) async throws -> OrderDTO {
         
-        guard let order = try await Order.find(req.parameters.get("orderID"), on: req.db(.orders)) else {
+        guard let order = try await Order.find(req.parameters.get("orderID"), on: req.db) else {
             throw Abort(.notFound)
         }
         
         let input = try req.content.decode(OrderDTO.self)
         order.total = input.total
         order.status = input.status
-        try await order.save(on: req.db(.orders))
+        try await order.save(on: req.db)
         
-        let existingItems = try await order.$items.get(on: req.db(.orders))
+        let existingItems = try await order.$items.get(on: req.db)
         for item in existingItems {
-            try await item.delete(on: req.db(.orders))
+            try await item.delete(on: req.db)
         }
         
         for itemDTO in input.items {
             let orderItem = OrderItem(orderID: try order.requireID(), productID: itemDTO.productID, quantity: itemDTO.quantity, price: itemDTO.price)
-            try await orderItem.save(on: req.db(.orders))
+            try await orderItem.save(on: req.db)
         }
         
         return try order.toDTO()
@@ -78,10 +78,10 @@ struct OrderControllerV1: RouteCollection {
     
     @Sendable
     func delete(req: Request) async throws -> HTTPStatus {
-        guard let order = try await Order.find(req.parameters.get("orderID"), on: req.db(.orders)) else {
+        guard let order = try await Order.find(req.parameters.get("orderID"), on: req.db) else {
             throw Abort(.notFound)
         }
-        try await order.delete(on: req.db(.orders))
+        try await order.delete(on: req.db)
         return .noContent
     }
 }

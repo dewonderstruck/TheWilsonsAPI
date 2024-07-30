@@ -20,12 +20,13 @@ func configureDatabases(_ app: Application) throws {
     let keyManagementDB = mongoDBURL + "/keyManagement"
 
     // MARK: - Attach Databases
-    try app.databases.use(.mongo(connectionString: mainDB), as: .main)
     try app.databases.use(.mongo(connectionString: productsDB), as: .products)
+    try app.databases.use(.mongo(connectionString: mainDB), as: .main)
     try app.databases.use(.mongo(connectionString: ordersDB), as: .orders)
     try app.databases.use(.mongo(connectionString: transactionsDB), as: .transactions)
     try app.databases.use(.mongo(connectionString: settlementsDB), as: .settlements)
     try app.databases.use(.mongo(connectionString: keyManagementDB), as: .keyManagement)
+    
 }
 
 extension DatabaseID {

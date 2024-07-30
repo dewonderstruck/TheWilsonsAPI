@@ -13,6 +13,7 @@ public func configure(_ app: Application) async throws {
     // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
 
      try configureDatabases(app)
+     app.databases.default(to: .main)
 
      let corsOrigins = Environment.get("CORS_ORIGINS")?.split(separator: ",").map(String.init) ?? []
     
@@ -40,7 +41,7 @@ public func configure(_ app: Application) async throws {
     let serviceAccount = try loadServiceAccount(from: "serviceAccount")
     FirebaseApp.initialize(serviceAccount: serviceAccount)
     
-    app.sessions.use(.fluent)
+    app.sessions.use(.fluent(.main))
     app.middleware.use(app.sessions.middleware)
     
     app.config.publicURL = Environment.get("PUBLIC_URL") ?? "http://localhost:8080"

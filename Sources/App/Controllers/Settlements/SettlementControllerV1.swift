@@ -17,7 +17,7 @@ struct SettlementControllerV1: RouteCollection {
 
     @Sendable
     func index(req: Request) async throws -> [SettlementDTO] {
-        let settlements = try await Settlement.query(on: req.db(.settlements)).all()
+        let settlements = try await Settlement.query(on: req.db).all()
         return settlements.map { $0.toDTO() }
     }
 
@@ -25,13 +25,13 @@ struct SettlementControllerV1: RouteCollection {
     func create(req: Request) async throws -> SettlementDTO {
         let input = try req.content.decode(SettlementDTO.self)
         let settlement = Settlement(transactionID: input.transactionID, amount: input.amount, status: input.status)
-        try await settlement.save(on: req.db(.settlements))
+        try await settlement.save(on: req.db)
         return settlement.toDTO()
     }
 
     @Sendable
     func show(req: Request) async throws -> SettlementDTO {
-        guard let settlement = try await Settlement.find(req.parameters.get("settlementID"), on: req.db(.settlements)) else {
+        guard let settlement = try await Settlement.find(req.parameters.get("settlementID"), on: req.db) else {
             throw Abort(.notFound)
         }
         return settlement.toDTO()
@@ -39,22 +39,22 @@ struct SettlementControllerV1: RouteCollection {
 
     @Sendable
     func update(req: Request) async throws -> SettlementDTO {
-        guard let settlement = try await Settlement.find(req.parameters.get("settlementID"), on: req.db(.settlements)) else {
+        guard let settlement = try await Settlement.find(req.parameters.get("settlementID"), on: req.db) else {
             throw Abort(.notFound)
         }
         let input = try req.content.decode(SettlementDTO.self)
         settlement.amount = input.amount
         settlement.status = input.status
-        try await settlement.save(on: req.db(.settlements))
+        try await settlement.save(on: req.db)
         return settlement.toDTO()
     }
 
     @Sendable
     func delete(req: Request) async throws -> HTTPStatus {
-        guard let settlement = try await Settlement.find(req.parameters.get("settlementID"), on: req.db(.settlements)) else {
+        guard let settlement = try await Settlement.find(req.parameters.get("settlementID"), on: req.db) else {
             throw Abort(.notFound)
         }
-        try await settlement.delete(on: req.db(.settlements))
+        try await settlement.delete(on: req.db)
         return .noContent
     }
 }

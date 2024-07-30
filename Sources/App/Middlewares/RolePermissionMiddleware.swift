@@ -39,7 +39,7 @@ struct RBACMiddleware: AsyncMiddleware, @unchecked Sendable {
     func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
         
         guard let user = request.auth.get(User.self) else {
-            throw Abort(.unauthorized, reason: "User not authenticated")
+            throw Abort(.unauthorized, reason: "You must be authenticated to access this resource.")
         }
 
         // Fetch the user's role permissions from the database
@@ -60,7 +60,7 @@ struct RBACMiddleware: AsyncMiddleware, @unchecked Sendable {
         }
         
         guard hasRequiredPermissions else {
-            throw Abort(.forbidden, reason: "User does not have the required permissions")
+            throw Abort(.forbidden, reason: "You do not have permission to access this resource.")
         }
         
         return try await next.respond(to: request)

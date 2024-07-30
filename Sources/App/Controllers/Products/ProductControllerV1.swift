@@ -17,7 +17,7 @@ struct ProductControllerV1: RouteCollection {
 
     @Sendable
     func index(req: Request) async throws -> [ProductDTO] {
-        let products = try await Product.query(on: req.db(.products)).all().map { $0.toDTO() }
+        let products = try await Product.query(on: req.db).all().map { $0.toDTO() }
         return products
     }
 
@@ -25,13 +25,13 @@ struct ProductControllerV1: RouteCollection {
     func create(req: Request) async throws -> ProductDTO {
         let input = try req.content.decode(ProductDTO.self)
         let product = Product(name: input.name, description: input.description, price: input.price)
-        try await product.save(on: req.db(.products))
+        try await product.save(on: req.db)
         
         for categoryID in input.categoryIDs {
-            guard let category = try await Category.find(categoryID, on: req.db(.products)) else {
+            guard let category = try await Category.find(categoryID, on: req.db) else {
                 throw Abort(.badRequest, reason: "Category not found")
             }
-            try await product.$categories.attach(category, on: req.db(.products))
+            try await product.$categories.attach(category, on: req.db)
         }
         
         return ProductDTO(
@@ -45,10 +45,10 @@ struct ProductControllerV1: RouteCollection {
 
     @Sendable
     func show(req: Request) async throws -> ProductDTO {
-        guard let product = try await Product.find(req.parameters.get("productID"), on: req.db(.products)) else {
+        guard let product = try await Product.find(req.parameters.get("productID"), on: req.db) else {
             throw Abort(.notFound)
         }
-        let categories = try await product.$categories.get(on: req.db(.products))
+        let categories = try await product.$categories.get(on: req.db)
         return ProductDTO(
             id: product.id,
             name: product.name,
@@ -60,17 +60,18 @@ struct ProductControllerV1: RouteCollection {
 
     @Sendable
     func update(req: Request) async throws -> ProductDTO {
-        guard let product = try await Product.find(req.parameters.get("productID"), on: req.db(.products)) else {
+        guard let product = try await Product.find(req.parameters.get("productID"), on: req.db) else {
             throw Abort(.notFound)
         }
         let input = try req.content.decode(ProductDTO.self)
         product.name = input.name
         product.description = input.description
         product.price = input.price
-        try await product.save(on: req.db(.products))
+        try await product.save(on: req.db)
         
+
         for categoryID in input.categoryIDs {
-            guard let category = try await Category.find(categoryID, on: req.db(.products)) else {
+            guard let category = try await Category.find(categoryID, on: req.db) else {
                 throw Abort(.badRequest, reason: "Category not found")
             }
             try await product.$categories.attach(category, on: req.db)
@@ -86,10 +87,10 @@ struct ProductControllerV1: RouteCollection {
 
     @Sendable
     func delete(req: Request) async throws -> HTTPStatus {
-        guard let product = try await Product.find(req.parameters.get("productID"), on: req.db(.products)) else {
+        guard let product = try await Product.find(req.parameters.get("productID"), on: req.db) else {
             throw Abort(.notFound)
         }
-        try await product.delete(on: req.db(.products))
+        try await product.delete(on: req.db)
         return .noContent
     }
 }

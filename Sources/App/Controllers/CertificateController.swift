@@ -11,7 +11,7 @@ struct CertificateController: RouteCollection {
 
     @Sendable
     func fetchPublicKey(req: Request) async throws -> [String: String] {
-        guard let key = try await Key.query(on: req.db(.keyManagement))
+        guard let key = try await Key.query(on: req.db)
             .filter(\.$keyType == .publicKey)
             .first() else {
             throw Abort(.notFound)
