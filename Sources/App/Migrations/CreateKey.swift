@@ -3,7 +3,7 @@ import Fluent
 
 struct CreateKey: AsyncMigration {
     func prepare(on database: Database) async throws {
-        try await database.schema("keys")
+        try await database.schema(Key.schema)
            .id()
             .field("kid", .string, .required)
             .field("key_type", .string, .required)
@@ -16,6 +16,6 @@ struct CreateKey: AsyncMigration {
     }
 
     func revert(on database: Database) async throws {
-        try await database.schema("keys").delete()
+        try await database.schema(Key.schema).delete()
     }
 }

@@ -46,6 +46,7 @@ struct SeedUserRolePermission: AsyncMigration {
             user: user,
             rolePermission: role
         )
+        
         try await userPermission.save(on: database)
     }
 

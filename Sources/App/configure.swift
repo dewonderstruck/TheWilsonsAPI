@@ -57,6 +57,13 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(SeedUser())
     app.migrations.add(SeedRolePermission())
     app.migrations.add(SeedUserRolePermission())
+    app.migrations.add(CreateProduct())
+    app.migrations.add(CreateCategory())
+    app.migrations.add(CreateProductCategory())
+    app.migrations.add(CreateOrder())
+    app.migrations.add(CreateOrderItem())
+    app.migrations.add(CreateTransaction())
+    app.migrations.add(CreateSettlement())
     
     // Load keys from database
     let keys = try await Key.query(on: app.db).filter(\.$status == .active).all()

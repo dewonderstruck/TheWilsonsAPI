@@ -5,6 +5,7 @@ import struct Foundation.UUID
 enum AccountType: String, Codable {
     case managed
     case user
+    case customer
     case organization
 }
 

@@ -2,7 +2,9 @@ import Fluent
 import Vapor
 
 final class Key: Model, Content, @unchecked Sendable {
-    static let schema = "keys"
+    
+    static let schema = "crypto_keys"
+    static let database: DatabaseID = .keyManagement
 
     @ID(key: .id)
     var id: UUID?
