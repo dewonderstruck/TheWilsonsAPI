@@ -9,13 +9,12 @@ import Resend
 
 // configures your application
 public func configure(_ app: Application) async throws {
-    // uncomment to serve files from /Public folder
-    // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
-
-     try configureDatabases(app)
-     app.databases.default(to: .main)
-
-     let corsOrigins = Environment.get("CORS_ORIGINS")?.split(separator: ",").map(String.init) ?? []
+    
+    try configureDatabases(app)
+    
+    app.databases.default(to: .main)
+    
+    let corsOrigins = Environment.get("CORS_ORIGINS")?.split(separator: ",").map(String.init) ?? []
     
     let corsConfiguration = CORSMiddleware.Configuration(
         allowedOrigin: .any(corsOrigins),
@@ -23,6 +22,7 @@ public func configure(_ app: Application) async throws {
         allowedHeaders: [.accept, .authorization, .contentType, .origin, .xRequestedWith, .userAgent, .accessControlAllowOrigin, .accessControlAllowHeaders, .init("X-CSRF-TOKEN")],
         allowCredentials: true
     )
+    
     let cors = CORSMiddleware(configuration: corsConfiguration)
     app.middleware.use(cors, at: .beginning)
     

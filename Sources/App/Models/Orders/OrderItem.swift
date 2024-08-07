@@ -18,16 +18,16 @@ final class OrderItem: Model, Content, @unchecked Sendable {
     
     @Field(key: "price")
     var price: Double
-
+    
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
-
+    
     @Timestamp(key: "updated_at", on: .update)
     var updatedAt: Date?
-
+    
     @Parent(key: "user_created")
     var userCreated: User
-
+    
     @Parent(key: "user_updated")
     var userUpdated: User
     

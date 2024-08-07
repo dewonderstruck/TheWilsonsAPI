@@ -29,12 +29,20 @@ struct OrderControllerV1: RouteCollection {
     
     @Sendable
     func create(req: Request) async throws -> OrderDTO {
+        
+        guard let user = req.auth.get(User.self) else {
+            throw Abort(.unauthorized)
+        }
+        
+        let userID = try user.requireID()
+        
         let input = try req.content.decode(OrderDTO.self)
-        let order = Order(userID: input.userID, total: input.total, status: input.status)
+        
+        let order = Order(userID: input.userID, total: input.total, status: input.status, userCreated: userID, userUpdated: userID)
         try await order.save(on: req.db)
         
         for itemDTO in input.items {
-            let orderItem = OrderItem(orderID: try order.requireID(), productID: itemDTO.productID, quantity: itemDTO.quantity, price: itemDTO.price)
+            let orderItem = OrderItem(orderID: try order.requireID(), productID: itemDTO.productID, quantity: itemDTO.quantity, price: itemDTO.price, userCreated: userID, userUpdated: userID)
             try await orderItem.save(on: req.db)
         }
         
@@ -53,6 +61,10 @@ struct OrderControllerV1: RouteCollection {
     @Sendable
     func update(req: Request) async throws -> OrderDTO {
         
+        guard let user = req.auth.get(User.self) else {
+            throw Abort(.unauthorized)
+        }
+        
         guard let order = try await Order.find(req.parameters.get("orderID"), on: req.db) else {
             throw Abort(.notFound)
         }
@@ -60,6 +72,7 @@ struct OrderControllerV1: RouteCollection {
         let input = try req.content.decode(OrderDTO.self)
         order.total = input.total
         order.status = input.status
+        order.$userUpdated.id = try user.requireID()
         try await order.save(on: req.db)
         
         let existingItems = try await order.$items.get(on: req.db)
@@ -68,7 +81,13 @@ struct OrderControllerV1: RouteCollection {
         }
         
         for itemDTO in input.items {
-            let orderItem = OrderItem(orderID: try order.requireID(), productID: itemDTO.productID, quantity: itemDTO.quantity, price: itemDTO.price)
+            let orderItem = OrderItem(orderID: try order.requireID(),
+                                      productID: itemDTO.productID,
+                                      quantity: itemDTO.quantity,
+                                      price: itemDTO.price,
+                                      userCreated: order.$userCreated.id,
+                                      userUpdated: try user.requireID()
+            )
             try await orderItem.save(on: req.db)
         }
         

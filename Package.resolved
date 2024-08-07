@@ -1,5 +1,5 @@
 {
-  "originHash" : "3d624efe431709898cbb27a09bf00d154f5441b1f50ec4fe47ced79046dce428",
+  "originHash" : "1d31de0c85140a80b68fd92879cf05e542689093507486f4432837e6bc134fbc",
   "pins" : [
     {
       "identity" : "anycodable",
@@ -119,6 +119,15 @@
       }
     },
     {
+      "identity" : "jmespath.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/adam-fowler/jmespath.swift.git",
+      "state" : {
+        "revision" : "3877a5060e85ae33e3b9fe51ab581784f65ec80e",
+        "version" : "1.0.3"
+      }
+    },
+    {
       "identity" : "jwt",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/jwt.git",
@@ -173,6 +182,15 @@
       }
     },
     {
+      "identity" : "paypal-kit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vamsii777/paypal-kit.git",
+      "state" : {
+        "revision" : "4cd086934cf0f4df3759c5fdad3030e8e4e81b16",
+        "version" : "0.0.2"
+      }
+    },
+    {
       "identity" : "queues",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/queues.git",
@@ -188,6 +206,15 @@
       "state" : {
         "revision" : "89a4350c1a6eb03b5693f481817741ff36a8cdcc",
         "version" : "1.1.1"
+      }
+    },
+    {
+      "identity" : "razorpay-kit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vamsii777/razorpay-kit.git",
+      "state" : {
+        "revision" : "7a4671cf536586d0ef6167cde1be9a480d0bf3ce",
+        "version" : "0.0.9"
       }
     },
     {
@@ -215,6 +242,24 @@
       "state" : {
         "revision" : "8c9a227476555c55837e569be71944e02a056b72",
         "version" : "4.9.1"
+      }
+    },
+    {
+      "identity" : "soto",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/soto-project/soto.git",
+      "state" : {
+        "revision" : "7f1225d1992debad64d6f0adec4dfc2c15a49367",
+        "version" : "7.0.0"
+      }
+    },
+    {
+      "identity" : "soto-core",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/soto-project/soto-core.git",
+      "state" : {
+        "revision" : "86145a0e6a5091bf124fc18aa029698c4c419b1a",
+        "version" : "7.0.0"
       }
     },
     {
@@ -278,6 +323,15 @@
       "state" : {
         "revision" : "46072478ca365fe48370993833cb22de9b41567f",
         "version" : "3.5.2"
+      }
+    },
+    {
+      "identity" : "swift-distributed-tracing",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-distributed-tracing.git",
+      "state" : {
+        "revision" : "11c756c5c4d7de0eeed8595695cadd7fa107aa19",
+        "version" : "1.1.1"
       }
     },
     {
@@ -377,6 +431,15 @@
       "state" : {
         "revision" : "3cc66843378709cf903379dc73e84168f7bfcc26",
         "version" : "1.0.2"
+      }
+    },
+    {
+      "identity" : "swift-service-context",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-service-context.git",
+      "state" : {
+        "revision" : "0c62c5b4601d6c125050b5c3a97f20cce881d32b",
+        "version" : "1.1.0"
       }
     },
     {
