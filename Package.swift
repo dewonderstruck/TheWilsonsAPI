@@ -20,7 +20,6 @@ let package = Package(
         .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.0.0"),
         .package(url: "https://github.com/vamsii777/razorpay-kit.git", from: "0.0.9"),
         .package(url: "https://github.com/soto-project/soto.git", from: "7.0.0"),
-        .package(url: "https://github.com/vamsii777/paypal-kit.git", from: "0.0.2"),
     ],
     targets: [
         .executableTarget(
@@ -40,8 +39,7 @@ let package = Package(
                 .product(name: "FirebaseAuth", package: "FirebaseAdmin"),
                 .product(name: "QueuesRedisDriver", package: "queues-redis-driver"),
                 .product(name: "RazorpayKit", package: "razorpay-kit"),
-                .product(name: "SotoS3", package: "soto"),
-                .product(name: "PayPalKit", package: "paypal-kit")
+                .product(name: "SotoS3", package: "soto")
             ],
             resources: [
                 .copy("serviceAccount.json")

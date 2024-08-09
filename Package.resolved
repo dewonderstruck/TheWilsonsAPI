@@ -1,5 +1,5 @@
 {
-  "originHash" : "1d31de0c85140a80b68fd92879cf05e542689093507486f4432837e6bc134fbc",
+  "originHash" : "bb374d0279e0c4a03fd7feabb7729bf28c9973a7c4f368c9def505344c0aa55b",
   "pins" : [
     {
       "identity" : "anycodable",
@@ -179,15 +179,6 @@
       "state" : {
         "revision" : "a31236f24bfd2ea2f520a74575881f6731d7ae68",
         "version" : "4.7.0"
-      }
-    },
-    {
-      "identity" : "paypal-kit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/vamsii777/paypal-kit.git",
-      "state" : {
-        "revision" : "4cd086934cf0f4df3759c5fdad3030e8e4e81b16",
-        "version" : "0.0.2"
       }
     },
     {

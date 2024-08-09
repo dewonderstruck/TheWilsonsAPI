@@ -10,11 +10,12 @@ func routes(_ app: Application) throws {
         "Hello, world!"
     }
     
-    try app.register(collection: AuthenicationControllerV1())
-    try app.register(collection: OrderControllerV1())
+    try app.register(collection: AuthenicationController())
+    try app.register(collection: OrderController())
     try app.register(collection: ProductControllerV1())
-    try app.register(collection: SettlementControllerV1())
-    try app.register(collection: TransactionControllerV1())
+    try app.register(collection: SettlementController())
+    try app.register(collection: TransactionController())
     try app.register(collection: CertificateController())
+    try app.register(collection: S3Controller())
     
 }

@@ -6,6 +6,8 @@ import JWT
 import Vapor
 import FirebaseApp
 import Resend
+import SotoCore
+import SotoS3
 
 // configures your application
 public func configure(_ app: Application) async throws {
@@ -13,6 +15,18 @@ public func configure(_ app: Application) async throws {
     try configureDatabases(app)
     
     app.databases.default(to: .main)
+    
+    guard let accessKey = Environment.get("AWS_ACCESS_KEY_ID"),
+          let secretKey = Environment.get("AWS_SECRET_ACCESS_KEY"),
+          let region = Environment.get("AWS_REGION"),
+          let endpoint = Environment.get("AWS_S3_ENDPOINT") // https://\(ProjectConfig.AWS.region).digitaloceanspaces.com
+    else {
+        fatalError("AWS credentials or region not set in environment variables")
+    }
+    
+    app.aws.client = AWSClient(credentialProvider: .static(accessKeyId: accessKey, secretAccessKey: secretKey), httpClient: app.http.client.shared)
+    
+    app.aws.s3 = S3(client: app.aws.client, region: .useast1, endpoint: endpoint)
     
     let corsOrigins = Environment.get("CORS_ORIGINS")?.split(separator: ",").map(String.init) ?? []
     

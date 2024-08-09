@@ -18,7 +18,7 @@ struct PasswordResetDTO: Content {
 }
 
 /// A controller responsible for handling authentication-related endpoints.
-struct AuthenicationControllerV1: RouteCollection {
+struct AuthenicationController: RouteCollection {
     
     /// Boots the authentication routes.
     /// - Parameter routes: The routes builder.
