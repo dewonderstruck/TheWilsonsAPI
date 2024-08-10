@@ -6,15 +6,29 @@ import Foundation
 
 struct S3Controller: RouteCollection {
     
+    private let fileUploadMiddleware: FileUploadMiddleware
+    
     func boot(routes: RoutesBuilder) throws {
+        
         let routes = routes.grouped("api", "s3")
         let files = routes.grouped("files")
+        let uploadRoute = files.grouped(fileUploadMiddleware)
         files.get(use: listFiles)
         files.get(":id", use: getFile)
-        files.post(use: uploadFile)
+        uploadRoute.post(use: uploadFileMultipart)
         files.patch(":id", use: updateFile)
         files.delete(":id", use: deleteFile)
         files.delete(use: deleteMultipleFiles)
+    }
+    
+    init() throws {
+        self.fileUploadMiddleware = FileUploadMiddleware(allowedExtensions: [
+            "jpg", "png", "pdf"
+        ], allowedContentTypes: [
+            HTTPMediaType.jpeg,
+            HTTPMediaType.png,
+            HTTPMediaType.pdf
+        ])
     }
     
     @Sendable
@@ -39,12 +53,32 @@ struct S3Controller: RouteCollection {
     
     @Sendable
     func uploadFile(req: Request) async throws -> Response {
+        
         let file = try req.content.decode(File.self)
+        
+        let fileID = UUID().uuidString
+        
         let s3 = req.application.aws.s3
+        
+        var newContentType = file.contentType?.description ?? "application/octet-stream" // Default content type
+        
         var buffer: ByteBuffer
+        
+        // Assuming `file.data` is raw binary
         let fileData = Data(buffer: file.data)
-        buffer = ByteBufferAllocator().buffer(capacity: fileData.count)
+        let encodedData = fileData.base64EncodedString()
+        
+        // Decode the data back to verify if it’s correctly encoded
+        guard let decodedData = Data(base64Encoded: encodedData) else {
+            throw Abort(.badRequest, reason: "Invalid base64 data")
+        }
+        
+        buffer = ByteBufferAllocator().buffer(capacity: decodedData.count)
         buffer.writeBytes(fileData)
+        
+        // Log the buffer size to debug invalid length
+        print("Buffer size: \(buffer.readableBytes)")
+        
         let request = S3.CreateMultipartUploadRequest(bucket: "MyBucket", key: file.filename)
         let response = try await s3.multipartUpload(request, buffer: buffer) { progress in
             print("Upload progress: \(progress)")
@@ -71,7 +105,7 @@ struct S3Controller: RouteCollection {
                 partNumber: partNumber,
                 uploadId: multipartUploadResponse.uploadId!
             )
-            let uploadPartResponse = try await s3.uploadPart(uploadPartRequest)
+            let uploadPartResponse = try await s3.uploadPart(uploadPartRequest) 
             parts.append(S3.CompletedPart(eTag: uploadPartResponse.eTag!, partNumber: partNumber))
             uploadPartRequests.append(uploadPartRequest)
             partNumber += 1
@@ -139,11 +173,6 @@ struct S3Controller: RouteCollection {
         let deletedCount = result.deleted?.count ?? 0
         return Response(status: .ok, body: .init(string: "Deleted \(deletedCount) files successfully"))
     }
-}
-
-struct File: Content {
-    let filename: String
-    var data: ByteBuffer
 }
 
 struct FileUpdateInfo: Content {

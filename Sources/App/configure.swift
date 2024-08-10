@@ -26,7 +26,7 @@ public func configure(_ app: Application) async throws {
     
     app.aws.client = AWSClient(credentialProvider: .static(accessKeyId: accessKey, secretAccessKey: secretKey), httpClient: app.http.client.shared)
     
-    app.aws.s3 = S3(client: app.aws.client, region: .useast1, endpoint: endpoint)
+    app.aws.s3 = S3(client: app.aws.client, region: .apsouth1, endpoint: endpoint)
     
     let corsOrigins = Environment.get("CORS_ORIGINS")?.split(separator: ",").map(String.init) ?? []
     
@@ -78,6 +78,8 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateOrderItem())
     app.migrations.add(CreateTransaction())
     app.migrations.add(CreateSettlement())
+    
+    app.routes.defaultMaxBodySize = "150mb"
     
     // Load keys from database
     let keys = try await Key.query(on: app.db).filter(\.$status == .active).all()

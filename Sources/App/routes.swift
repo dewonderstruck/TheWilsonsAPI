@@ -12,7 +12,7 @@ func routes(_ app: Application) throws {
     
     try app.register(collection: AuthenicationController())
     try app.register(collection: OrderController())
-    try app.register(collection: ProductControllerV1())
+    try app.register(collection: ProductController())
     try app.register(collection: SettlementController())
     try app.register(collection: TransactionController())
     try app.register(collection: CertificateController())
