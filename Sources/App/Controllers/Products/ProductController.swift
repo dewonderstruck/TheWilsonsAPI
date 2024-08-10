@@ -6,24 +6,25 @@ struct ProductController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let v1 = routes.grouped("v1")
         let products = v1.grouped("products")
-        products.get(use: index)
-        products.post(use: create)
+        let protectedProducts = products.grouped(TokenAuthenticator()).grouped(User.guardMiddleware())
+        protectedProducts.grouped(requireAny: .readProducts, .manageProducts).get(use: index)
+        protectedProducts.grouped(requireAny: .createProducts, .manageProducts).post(use: create)
         products.group(":productID") { product in
-            product.get(use: show)
-            product.put(use: update)
-            product.delete(use: delete)
+            protectedProducts.grouped(requireAny: .readProducts, .manageProducts).get(use: show)
+            protectedProducts.grouped(requireAny: .updateProducts, .manageProducts).put(use: update)
+            protectedProducts.grouped(requireAny: .deleteProducts, .manageProducts).delete(use: delete)
         }
     }
-
+    
     @Sendable
     func index(req: Request) async throws -> [ProductDTO] {
         let products = try await Product.query(on: req.db).all().map { $0.toDTO() }
         return products
     }
-
+    
     @Sendable
     func create(req: Request) async throws -> ProductDTO {
-         guard let user = req.auth.get(User.self) else {
+        guard let user = req.auth.get(User.self) else {
             throw Abort(.unauthorized)
         }
         let input = try req.content.decode(ProductDTO.self)
@@ -47,7 +48,7 @@ struct ProductController: RouteCollection {
             userUpdated: try product.userUpdated.requireID()
         )
     }
-
+    
     @Sendable
     func show(req: Request) async throws -> ProductDTO {
         guard let product = try await Product.find(req.parameters.get("productID"), on: req.db) else {
@@ -64,12 +65,12 @@ struct ProductController: RouteCollection {
             userUpdated: try product.userUpdated.requireID()
         )
     }
-
+    
     @Sendable
     func update(req: Request) async throws -> ProductDTO {
         guard let user = req.auth.get(User.self) else {
-           throw Abort(.unauthorized)
-       }
+            throw Abort(.unauthorized)
+        }
         guard let product = try await Product.find(req.parameters.get("productID"), on: req.db) else {
             throw Abort(.notFound)
         }
@@ -95,7 +96,7 @@ struct ProductController: RouteCollection {
             userUpdated: try product.userUpdated.requireID()
         )
     }
-
+    
     @Sendable
     func delete(req: Request) async throws -> HTTPStatus {
         guard let product = try await Product.find(req.parameters.get("productID"), on: req.db) else {

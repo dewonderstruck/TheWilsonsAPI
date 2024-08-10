@@ -29,7 +29,10 @@ func configureDatabases(_ app: Application) throws {
     
 }
 
+// MARK: - Database IDs
 extension DatabaseID {
+    // Define database IDs
+    // These IDs are used to refer to the databases in the application
     static let main = DatabaseID(string: "main")
     static let products = DatabaseID(string: "products")
     static let orders = DatabaseID(string: "orders")
