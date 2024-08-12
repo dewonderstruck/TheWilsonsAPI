@@ -40,24 +40,14 @@ let package = Package(
                 .product(name: "QueuesRedisDriver", package: "queues-redis-driver"),
                 .product(name: "RazorpayKit", package: "razorpay-kit"),
                 .product(name: "SotoS3", package: "soto")
-            ],
-            resources: [
-                .copy("serviceAccount.json")
-            ],
-            swiftSettings: swiftSettings
+            ]
         ),
         .testTarget(
             name: "AppTests",
             dependencies: [
                 .target(name: "App"),
                 .product(name: "XCTVapor", package: "vapor"),
-            ],
-            swiftSettings: swiftSettings
+            ]
         )
     ]
 )
-
-var swiftSettings: [SwiftSetting] { [
-    .enableUpcomingFeature("DisableOutwardActorInference"),
-    .enableExperimentalFeature("StrictConcurrency"),
-] }

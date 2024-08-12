@@ -1,7 +1,7 @@
 import Vapor
 import Fluent
 
-final class FileChunks: Model, Content {
+final class FileChunks: Model, Content, @unchecked Sendable {
     init() { }
     
     static let schema = "file_chunk"
@@ -17,11 +17,15 @@ final class FileChunks: Model, Content {
     
     @Field(key: "chunk_data")
     var chunkData: Data
+
+    @Parent(key: "file_id")
+    var file: FileModel
     
     init(id: UUID? = nil, chunkNumber: Int, chunkSize: Int, chunkData: Data, fileID: UUID) {
         self.id = id
         self.chunkNumber = chunkNumber
         self.chunkSize = chunkSize
         self.chunkData = chunkData
+        self.$file.id = fileID
     }
 }

@@ -78,6 +78,8 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateOrderItem())
     app.migrations.add(CreateTransaction())
     app.migrations.add(CreateSettlement())
+    app.migrations.add(CreateFile())
+    app.migrations.add(CreateFileChunk())
     
     app.routes.defaultMaxBodySize = "150mb"
     

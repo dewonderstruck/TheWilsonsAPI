@@ -22,6 +22,12 @@ final class FileModel: Model, Content, @unchecked Sendable {
     @Field(key: "storage_type")
     var storageType: StorageType
     
+    @Field(key: "bucket")
+    var bucket: String
+    
+    @Field(key: "s3_etag")
+    var s3ETag: String?
+    
     @Field(key: "is_public")
     var isPublic: Bool
     
@@ -33,13 +39,14 @@ final class FileModel: Model, Content, @unchecked Sendable {
     
     init() { }
     
-    init(id: UUID? = nil, fileName: String, fileSize: Int, fileType: String, uploadDate: Date, storageType: StorageType, isPublic: Bool) {
+    init(id: UUID? = nil, fileName: String, fileSize: Int, fileType: String, bucket: String, uploadDate: Date, storageType: StorageType, isPublic: Bool) {
         self.id = id
         self.fileName = fileName
         self.fileSize = fileSize
         self.fileType = fileType
         self.uploadDate = uploadDate
         self.storageType = storageType
+        self.bucket = bucket
         self.isPublic = isPublic
     }
 }

@@ -6,7 +6,7 @@ func configureDatabases(_ app: Application) throws {
 
     // MARK: - MongoDB BaseURL
     // mongodb://<username>:<password>@<hostname>:<port>/<database>
-    guard let mongoDBURL = Environment.get("MONGODB_URL") else {
+    guard let mongoDBURL = Environment.get("DATABASE_URL") else {
         app.logger.critical("MongoDB URL not found in environment variables.")
         throw Abort(.internalServerError, reason: "MongoDB configuration failed.")
     }
