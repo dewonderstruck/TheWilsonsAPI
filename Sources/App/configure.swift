@@ -16,6 +16,10 @@ public func configure(_ app: Application) async throws {
     
     app.databases.default(to: .main)
     
+    app.http.server.configuration.port = 8081
+    
+    app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
+    
     guard let accessKey = Environment.get("AWS_ACCESS_KEY_ID"),
           let secretKey = Environment.get("AWS_SECRET_ACCESS_KEY"),
           let region = Environment.get("AWS_REGION"),
@@ -28,7 +32,10 @@ public func configure(_ app: Application) async throws {
     
     app.aws.s3 = S3(client: app.aws.client, region: .apsouth1, endpoint: endpoint)
     
-    let corsOrigins = Environment.get("CORS_ORIGINS")?.split(separator: ",").map(String.init) ?? []
+    let corsOrigins = Environment.get("CORS_ORIGINS")?.split(separator: ",").map(String.init) ?? [
+        "http://localhost:8080",
+        "http://localhost:3000"
+    ]
     
     let corsConfiguration = CORSMiddleware.Configuration(
         allowedOrigin: .any(corsOrigins),
@@ -80,6 +87,7 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateSettlement())
     app.migrations.add(CreateFile())
     app.migrations.add(CreateFileChunk())
+    app.migrations.add(CreatePaymentLink())
     
     app.routes.defaultMaxBodySize = "150mb"
     
@@ -104,4 +112,14 @@ public func configure(_ app: Application) async throws {
     
     // register routes
     try routes(app)
+}
+
+
+fileprivate var templateFolder: String {
+    return projectFolder + "Resources/Views/"
+}
+
+fileprivate var projectFolder: String {
+    let folder = #file.split(separator: "/").dropLast(3).joined(separator: "/")
+    return "/" + folder + "/"
 }

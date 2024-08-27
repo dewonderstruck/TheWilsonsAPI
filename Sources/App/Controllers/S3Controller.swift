@@ -65,7 +65,6 @@ struct S3Controller: RouteCollection {
     @Sendable
     func getFile(req: Request) async throws -> Response {
 
-
         guard let fileId = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest)
         }

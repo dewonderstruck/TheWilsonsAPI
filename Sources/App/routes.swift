@@ -17,5 +17,6 @@ func routes(_ app: Application) throws {
     try app.register(collection: TransactionController())
     try app.register(collection: CertificateController())
     try app.register(collection: S3Controller())
+    try app.register(collection: DashboardController())
     
 }

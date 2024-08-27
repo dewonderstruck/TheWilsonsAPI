@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "TheWilsonsAPI",
     platforms: [
-       .macOS(.v13)
+        .macOS(.v13)
     ],
     dependencies: [
         .package(url: "https://github.com/vapor/vapor.git", from: "4.102.1"),
@@ -20,6 +20,7 @@ let package = Package(
         .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.0.0"),
         .package(url: "https://github.com/vamsii777/razorpay-kit.git", from: "0.0.9"),
         .package(url: "https://github.com/soto-project/soto.git", from: "7.0.0"),
+        .package(url: "https://github.com/soto-project/soto-codegenerator", from: "7.1.1"),
     ],
     targets: [
         .executableTarget(
@@ -40,7 +41,8 @@ let package = Package(
                 .product(name: "QueuesRedisDriver", package: "queues-redis-driver"),
                 .product(name: "RazorpayKit", package: "razorpay-kit"),
                 .product(name: "SotoS3", package: "soto")
-            ]
+            ],
+            plugins: [.plugin(name: "SotoCodeGeneratorPlugin", package: "soto-codegenerator")]
         ),
         .testTarget(
             name: "AppTests",

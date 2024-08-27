@@ -17,6 +17,10 @@ struct PasswordResetDTO: Content {
     let password: String
 }
 
+struct TokenValidation: Content {
+    let isAuthenticated: Bool
+}
+
 /// A controller responsible for handling authentication-related endpoints.
 struct AuthenicationController: RouteCollection {
     
@@ -27,6 +31,8 @@ struct AuthenicationController: RouteCollection {
         let auth = v1.grouped("auth")
         let authGroup = auth.grouped(TokenAuthenticator()).grouped(User.guardMiddleware())
         auth.post("login", use: loginHandler)
+        auth.grouped(TokenAuthenticator()).get("me", use: me)
+        auth.grouped(TokenAuthenticator()).get("status", use: requestTokenValidation)
         auth.post("refresh", use: refreshHandler)
         auth.post("password", "request", use: requestPasswordResetHandler)
         auth.post("password", "reset", use: resetPasswordHandler)
@@ -34,6 +40,59 @@ struct AuthenicationController: RouteCollection {
         auth.post("login", ":provider", use: loginWithProviderHandler)
         authGroup.post("logout", use: enhancedLogoutHandler)
     }
+    
+    func me(req: Request) async throws -> UserDTO {
+        // Require the authenticated user
+        let user = try req.auth.require(User.self)
+        // Check if the user exists and is active
+        guard let userExists = try await User.query(on: req.db)
+            .filter(\.$id == user.id!)
+            .filter(\.$status == .active)
+            .first() else {
+            throw Abort(.unauthorized, reason: "User not found or inactive")
+        }
+
+        // Convert the User model to UserDTO
+        let userDTO = UserDTO(
+            id: userExists.id,
+            firstName: userExists.firstName,
+            lastName: userExists.lastName,
+            email: userExists.email,
+            status: userExists.status,
+            role: userExists.role,
+            provider: userExists.provider,
+            providerUserId: userExists.providerUserId,
+            externalIdentifier: userExists.externalIdentifier,
+            memberId: userExists.memberId,
+            accountType: userExists.accountType,
+            emailVerified: userExists.emailVerified,
+            phoneNumberVerified: userExists.phoneNumberVerified,
+            phoneNumber: userExists.phoneNumber,
+            address: userExists.address,
+            area: userExists.area
+        )
+
+        return userDTO
+    }
+
+    
+    func requestTokenValidation(req: Request) async throws -> TokenValidation {
+        let user = try req.auth.require(User.self)
+        // check token validation with date exipration
+        let token = try await Token.query(on: req.db)
+            .filter(\.$user.$id == user.id!)
+            .filter(\.$status == .active)
+            .filter(\.$expiresAt > Date())
+            .first()
+        
+        if token == nil {
+            return TokenValidation(isAuthenticated: false)
+        } else {
+            return TokenValidation(isAuthenticated: true)
+        }
+    }
+    
+    
     
      // MARK: - Login
     /// Handles the login request and returns a token.
