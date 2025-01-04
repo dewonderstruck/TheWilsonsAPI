@@ -7,16 +7,32 @@ let package = Package(
        .macOS(.v13)
     ],
     dependencies: [
-        // 💧 A server-side Swift web framework.
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.110.1"),
-        // 🗄 An ORM for SQL and NoSQL databases.
-        .package(url: "https://github.com/vapor/fluent.git", from: "4.9.0"),
-        // 🌱 Fluent driver for Mongo.
-        .package(url: "https://github.com/vapor/fluent-mongo-driver.git", from: "1.3.1"),
-        // 🔵 Non-blocking, event-driven networking for Swift. Used for custom executors
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.111.0"),
+        .package(url: "https://github.com/vapor/fluent.git", from: "4.12.0"),
+        .package(url: "https://github.com/vapor/fluent-mongo-driver.git", from: "1.4.0"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
+        .package(url: "https://github.com/vapor/jwt.git", from: "4.2.2"),
+        .package(url: "https://github.com/vamsii777/swift-resend.git", branch: "main"),
+        .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.1.2"),
     ],
     targets: [
+        .target(
+            name: "Auth",
+            dependencies: [
+                .product(name: "JWT", package: "jwt"),
+                .product(name: "Fluent", package: "fluent"),
+                .product(name: "FluentMongoDriver", package: "fluent-mongo-driver"),
+                .product(name: "Resend", package: "swift-resend"),
+                .product(name: "QueuesRedisDriver", package: "queues-redis-driver")
+            ]
+        ),  
+        .target(
+            name: "Shop",
+            dependencies: [
+                .product(name: "Vapor", package: "vapor"),
+                .product(name: "Fluent", package: "fluent"),
+                .target(name: "Auth")
+        ]),
         .executableTarget(
             name: "App",
             dependencies: [
@@ -25,6 +41,8 @@ let package = Package(
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
+                .target(name: "Auth"),
+                .target(name: "Shop")
             ],
             swiftSettings: swiftSettings
         ),
